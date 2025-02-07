@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <title>황금 열쇠 찾기 게임</title>
   <style>
+    /* 기본 리셋 및 박스 사이징 */
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 20px;
       background-color: #e8f0fe;
+      text-align: center;
     }
     h1 {
       margin-bottom: 10px;
@@ -17,39 +21,58 @@
     p {
       margin-bottom: 20px;
     }
+    /* 컨테이너 스타일: 화면에 따라 그리드 열 수 변경 */
     .container {
       display: grid;
-      grid-template-columns: repeat(6, 80px);
-      grid-gap: 10px;
-      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      margin: 0 auto;
+      /* 최대 너비를 지정하여 PC에서는 화면 비율에 맞게 */
+      max-width: 1200px;
     }
+    /* PC(또는 폭이 넓은 화면): 가로로 길게 배치 (예, 10열) */
+    @media (min-width: 768px) {
+      .container {
+        grid-template-columns: repeat(10, 1fr);
+      }
+    }
+    /* 모바일(또는 폭이 좁은 화면): 세로로 한눈에 보이도록 (예, 3열) */
+    @media (max-width: 767px) {
+      .container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    /* 카드 스타일: 유연한 사이즈와 고정 종횡비 (2:3, 기존 80×120 비율과 동일) */
     .card {
-      width: 80px;
-      height: 120px;
+      background-color: #fff;
       border: 2px solid #333;
       border-radius: 8px;
-      background-color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
       position: relative;
+      cursor: pointer;
+      aspect-ratio: 2 / 3;
       transition: background-color 0.3s;
     }
     .card:hover {
       background-color: #f7f7f7;
     }
+    /* 뒤집힌 카드 스타일 */
     .card.revealed {
       background-color: #dff0d8;
       cursor: default;
     }
+    /* 카드 앞면의 번호 스타일 */
     .number {
-      font-size: 24px;
+      font-size: 1.5em;
       font-weight: bold;
     }
+    /* 열쇠 이미지 크기 조정 */
     .card img {
-      max-width: 50px;
-      max-height: 50px;
+      max-width: 60%;
+      max-height: 60%;
+      object-fit: contain;
     }
   </style>
 </head>
@@ -59,6 +82,10 @@
   <div class="container">
     <!-- 카드들이 JavaScript로 생성됩니다. -->
   </div>
+
+  <!-- 효과음: 파일들은 HTML 파일과 동일한 폴더에 위치한다고 가정 -->
+  <audio id="audioGood" src="goodresult-82807.mp3"></audio>
+  <audio id="audioError" src="error-83494.mp3"></audio>
 
   <script>
     const totalCards = 30;   // 총 카드 수
@@ -78,6 +105,8 @@
     generateKeyPositions();
 
     const container = document.querySelector('.container');
+    const audioGood = document.getElementById('audioGood');
+    const audioError = document.getElementById('audioError');
 
     // 카드 생성
     for (let i = 0; i < totalCards; i++) {
@@ -85,7 +114,7 @@
       card.classList.add('card');
       card.dataset.index = i;  // 카드의 인덱스를 저장
 
-      // 카드 앞면에 번호 표시
+      // 카드 앞면에 번호 표시 (1~30)
       const numberSpan = document.createElement('span');
       numberSpan.classList.add('number');
       numberSpan.textContent = i + 1;
@@ -93,21 +122,27 @@
 
       // 카드 클릭 이벤트
       card.addEventListener('click', function() {
-        // 이미 클릭하여 뒤집힌 카드라면 반응하지 않음
+        // 이미 뒤집힌 카드라면 반응하지 않음
         if (card.classList.contains('revealed')) return;
         card.classList.add('revealed');
 
         // 카드 인덱스가 열쇠 위치에 포함되어 있는지 확인
         if (keyPositions.includes(i)) {
-          // 번호를 숨기고 황금 열쇠 이미지 추가
+          // 열쇠가 있는 경우: 번호 숨기고 황금 열쇠 이미지 추가
           numberSpan.style.display = 'none';
           const keyImg = document.createElement('img');
           keyImg.src = "https://cdn-icons-png.flaticon.com/256/10097/10097035.png";
           keyImg.alt = "황금 열쇠";
           card.appendChild(keyImg);
+          // 효과음 재생
+          audioGood.currentTime = 0;
+          audioGood.play();
         } else {
-          // 열쇠가 없는 카드라면 "X" 표시 (또는 원하는 메시지)
+          // 오답인 경우: "X" 표시
           numberSpan.textContent = "X";
+          // 효과음 재생
+          audioError.currentTime = 0;
+          audioError.play();
         }
       });
 
