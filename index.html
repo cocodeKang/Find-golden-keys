@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>황금 열쇠 찾기 게임</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #e8f0fe;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(6, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .card {
+      width: 80px;
+      height: 120px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+    .card:hover {
+      background-color: #f7f7f7;
+    }
+    .card.revealed {
+      background-color: #dff0d8;
+      cursor: default;
+    }
+    .number {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .card img {
+      max-width: 50px;
+      max-height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>황금 열쇠 찾기 게임</h1>
+  <p>카드를 클릭해서 숨겨진 황금 열쇠를 찾아보세요!</p>
+  <div class="container">
+    <!-- 카드들이 JavaScript로 생성됩니다. -->
+  </div>
+
+  <script>
+    const totalCards = 30;   // 총 카드 수
+    const totalKeys = 5;     // 숨겨진 황금 열쇠 수
+    let keyPositions = [];
+
+    // 0 ~ totalCards-1 사이의 중복되지 않는 난수(totalKeys개)를 생성합니다.
+    function generateKeyPositions() {
+      keyPositions = [];
+      while (keyPositions.length < totalKeys) {
+        const randomIndex = Math.floor(Math.random() * totalCards);
+        if (!keyPositions.includes(randomIndex)) {
+          keyPositions.push(randomIndex);
+        }
+      }
+    }
+    generateKeyPositions();
+
+    const container = document.querySelector('.container');
+
+    // 카드 생성
+    for (let i = 0; i < totalCards; i++) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.index = i;  // 카드의 인덱스를 저장
+
+      // 카드 앞면에 번호 표시
+      const numberSpan = document.createElement('span');
+      numberSpan.classList.add('number');
+      numberSpan.textContent = i + 1;
+      card.appendChild(numberSpan);
+
+      // 카드 클릭 이벤트
+      card.addEventListener('click', function() {
+        // 이미 클릭하여 뒤집힌 카드라면 반응하지 않음
+        if (card.classList.contains('revealed')) return;
+        card.classList.add('revealed');
+
+        // 카드 인덱스가 열쇠 위치에 포함되어 있는지 확인
+        if (keyPositions.includes(i)) {
+          // 번호를 숨기고 황금 열쇠 이미지 추가
+          numberSpan.style.display = 'none';
+          const keyImg = document.createElement('img');
+          keyImg.src = "https://cdn-icons-png.flaticon.com/256/10097/10097035.png";
+          keyImg.alt = "황금 열쇠";
+          card.appendChild(keyImg);
+        } else {
+          // 열쇠가 없는 카드라면 "X" 표시 (또는 원하는 메시지)
+          numberSpan.textContent = "X";
+        }
+      });
+
+      container.appendChild(card);
+    }
+  </script>
+</body>
+</html>
